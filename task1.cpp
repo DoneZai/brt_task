@@ -7,15 +7,9 @@ using namespace std;
 class KineBicycleModel
 {
 private:
-    double X, Y, theta, velocity, v_dot, steering_angle, L;
+    double X, Y, theta, velocity, L;
 public:
-    KineBicycleModel(){
-        X=0;
-        Y=0; 
-        theta=0;
-        velocity=0;
-        L=1.5;
-    }
+    KineBicycleModel() : X(0), Y(0), theta(0), velocity(0), L(1.5) {}
 
     void updateState(double dt){
         int steps;
@@ -33,8 +27,8 @@ public:
             v_dot = controll[i][0];
             steering_angle = controll[i][1];
             X += velocity*cos(theta)*dt;
-            Y += velocity*cos(theta)*dt;
-            theta += velocity*tan(steering_angle)/L;
+            Y += velocity*sin(theta)*dt;
+            theta += velocity*tan(steering_angle)/L*dt;
             velocity += v_dot*dt;
             cout<<X<<" "<<Y<<" "<<theta<<" "<<velocity<<"\n"<<endl;
         }
