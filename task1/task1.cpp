@@ -5,15 +5,16 @@
 using namespace std;
 
 struct Kesi {
-    double X, Y, theta, velocity, L, v_dot, steering_angle;
+    double X, Y, theta, velocity,v_dot, steering_angle;
 };
 
 class KineBicycleModel
 {
 private:
     Kesi kesi;
+    double L;
 public:
-    KineBicycleModel() :kesi({0, 0, 0, 0, 1.5, 0, 0}) {}
+    KineBicycleModel() :kesi({0, 0, 0, 0, 0, 0}),L(1.5) {}
 
     void updatestate(double dt){
         int steps;
@@ -28,7 +29,7 @@ public:
             kesi.steering_angle = controll[i][1];
             kesi.X += kesi.velocity*cos(kesi.theta)*dt;
             kesi.Y += kesi.velocity*sin(kesi.theta)*dt;
-            kesi.theta += kesi.velocity*tan(kesi.steering_angle)/kesi.L*dt;
+            kesi.theta += kesi.velocity*tan(kesi.steering_angle)/L*dt;
             kesi.velocity += kesi.v_dot*dt;
             cout<<kesi.X<<" "<<kesi.Y<<" "<<kesi.theta<<" "<<kesi.velocity<<"\n"<<endl;
         }
