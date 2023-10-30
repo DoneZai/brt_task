@@ -38,10 +38,14 @@ public:
             Fdrag = Cd*kesi_old.v_x*kesi_old.v_x;
             Fbf = kesi_new.brakes*Cbf*tanh(kesi_old.v_x);
             Fbr = kesi_new.brakes*Cbr*tanh(kesi_old.v_x);
-            alpha_f = atan((kesi_old.v_y+lf*kesi_old.r)/kesi_old.v_x)-kesi_new.steering_angle;
-            alpha_r = atan((kesi_old.v_y-lr*kesi_old.r)/kesi_old.v_x);
+            //alpha_f = atan((kesi_old.v_y+lf*kesi_old.r)/kesi_old.v_x)-kesi_new.steering_angle;
+            //alpha_r = atan((kesi_old.v_y-lr*kesi_old.r)/kesi_old.v_x);
             alpha_f = atan2((kesi_old.v_y+lf*kesi_old.r),kesi_old.v_x)-kesi_new.steering_angle;
             alpha_r = atan2((kesi_old.v_y-lr*kesi_old.r),kesi_old.v_x);
+            if (alpha_f>0.087){alpha_f = 0.087;}
+            if (alpha_r>0.087){alpha_r = 0.087;}
+            if (alpha_f<-0.087){alpha_f = -0.087;}
+            if (alpha_r<-0.087){alpha_r = -0.087;}
             // alpha_f = atan(((kesi_old.v_y+lf*kesi_old.r)*cos(kesi_new.steering_angle)-kesi_old.v_x*sin(kesi_new.steering_angle))/((kesi_old.v_y+lf*kesi_old.r)*sin(kesi_new.steering_angle)+kesi_old.v_x*cos(kesi_new.steering_angle)))-kesi_new.steering_angle;
             // alpha_r = atan((kesi_old.v_y-lr*kesi_old.r)/kesi_old.v_x);
             // alpha_f = ((kesi_old.v_y+lf*kesi_old.r)/kesi_old.v_x)-kesi_new.steering_angle;
@@ -72,7 +76,7 @@ public:
             // kesi_new.r = kesi_old.r + 1/Iz*((Ffy*cos(kesi_new.steering_angle)-Frrf*sin(kesi_new.steering_angle)
             //                 -Fbf*sin(kesi_new.steering_angle))*lf-Fry*lr)*dt;
             // kesi_new.r = kesi_old.r + 1/Iz*((Ffy*cos(kesi_new.steering_angle))*lf-Fry*lr)*dt;
-            if(kesi_new.v_x<0){kesi_new.v_x=0.00001;kesi_new.v_y=0;kesi_new.r=10;}
+            if(kesi_new.v_x<0){kesi_new.v_x=0.00001;} //kesi_new.v_y=0;kesi_new.r=10;
             cout<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<"\n"<<endl;
             kesi_old = kesi_new;
         }
