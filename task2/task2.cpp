@@ -11,7 +11,6 @@ struct Kesi {
 struct states_dot {
     double X_dot, Y_dot, phi_dot,vx_dot,vy_dot,r_dot; 
 
-        // 重载乘法运算符
     states_dot operator*(double scalar) const {
         states_dot result;
         result.X_dot = X_dot * scalar;
@@ -23,7 +22,6 @@ struct states_dot {
         return result;
     }
 
-    // 重载加法运算符
     states_dot operator+(const states_dot& other) const {
         states_dot result;
         result.X_dot = X_dot + other.X_dot;
