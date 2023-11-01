@@ -70,10 +70,10 @@ public:
 
             alpha_f = atan2((kesi_old.v_y+lf*kesi_old.r),kesi_old.v_x)-kesi_new.steering_angle;
             alpha_r = atan2((kesi_old.v_y-lr*kesi_old.r),kesi_old.v_x);
-            if (alpha_f>0.087){alpha_f = 0.087;}
-            if (alpha_r>0.087){alpha_r = 0.087;}
-            if (alpha_f<-0.087){alpha_f = -0.087;}
-            if (alpha_r<-0.087){alpha_r = -0.087;} //Ограничить угол скольжения шины линейной областью magic formula
+            // if (alpha_f>0.087){alpha_f = 0.087;}
+            // if (alpha_r>0.087){alpha_r = 0.087;}
+            // if (alpha_f<-0.087){alpha_f = -0.087;}
+            // if (alpha_r<-0.087){alpha_r = -0.087;} //Ограничить угол скольжения шины линейной областью magic formula
 
             Ffy = -Cx*alpha_f;
             Fry = -Cx*alpha_r;
@@ -98,8 +98,10 @@ public:
             states_dot_kin.vy_dot = ((kesi_new.steering_angle-kesi_old.steering_angle)/dt*kesi_old.v_x+kesi_new.steering_angle*states_dot_kin.vx_dot)*(lr/(lr+lf));
             states_dot_kin.r_dot = ((kesi_new.steering_angle-kesi_old.steering_angle)/dt*kesi_old.v_x+kesi_new.steering_angle*states_dot_kin.vx_dot)*(1/(lr+lf));
 
-            double lamda = min(max((kesi_old.v_x-3)/(5-3),0.0),1.0);
-            states_dot_all = states_dot_dyn*lamda+states_dot_kin*(1-lamda);
+            // double lamda = min(max((kesi_old.v_x-3)/(5-3),0.0),1.0);
+            // states_dot_all = states_dot_dyn*lamda+states_dot_kin*(1-lamda);
+            states_dot_all = states_dot_dyn;
+
             // kesi_new.X = kesi_old.X + (kesi_old.v_x*cos(kesi_old.theta)-kesi_old.v_y*sin(kesi_old.theta))*dt;
             // kesi_new.Y = kesi_old.X + (kesi_old.v_x*sin(kesi_old.theta)+kesi_old.v_y*cos(kesi_old.theta))*dt;
             // kesi_new.theta = kesi_old.theta + kesi_old.r*dt;
