@@ -47,7 +47,7 @@ private:
     double Fdrv,Frrr,Frrf,Fdrag,Fbf,Fbr,Fry,Ffy,alpha_f,alpha_r;
 
 public:
-    DynaBicycleModel() :kesi_new({0, 0, 0, 0, 0, 0, 0, 0, 0}),kesi_old({0.001, 0.001, 0.001, 20, 0.001, 0.001, 0, 0, 0}) {}
+    DynaBicycleModel() :kesi_new({0, 0, 0, 0, 0, 0, 0, 0, 0}),kesi_old({0.001, 0.001, 0.001, 20, 0, 0, 0, 0, 0}) {}
 
     void updatestate(double dt){
         int steps;
@@ -67,9 +67,9 @@ public:
             Fdrag = Cd*kesi_old.v_x*kesi_old.v_x;
             Fbf = kesi_new.brakes*Cbf*tanh(kesi_old.v_x);
             Fbr = kesi_new.brakes*Cbr*tanh(kesi_old.v_x);
-
             alpha_f = atan2((kesi_old.v_y+lf*kesi_old.r),kesi_old.v_x)-kesi_new.steering_angle;
             alpha_r = atan2((kesi_old.v_y-lr*kesi_old.r),kesi_old.v_x);
+
             // if(kesi_new.v_x<0.1){alpha_f = 0}
             // if (alpha_f>0.087){alpha_f = 0.087;}
             // if (alpha_r>0.087){alpha_r = 0.087;}
@@ -92,9 +92,9 @@ public:
             states_dot_dyn.r_dot = 1/Iz*((Ffy*cos(kesi_new.steering_angle)-Frrf*sin(kesi_new.steering_angle)
                             -Fbf*sin(kesi_new.steering_angle))*lf-Fry*lr);
 
-            states_dot_dyn.vx_dot = 1/m*(m*kesi_old.v_y*kesi_old.r+2*Fdrv-2*Frrr-2*Frrf-Fdrag-2*Fbf-2*Fbr-2*Ffy*sin(kesi_new.steering_angle));
-            states_dot_dyn.vy_dot = 1/m*(-m*kesi_old.v_x*kesi_old.r+2*Fry+2*Ffy*cos(kesi_new.steering_angle));
-            states_dot_dyn.r_dot = 1/Iz*((2*Ffy*cos(kesi_new.steering_angle))*lf-2*Fry*lr);
+            // states_dot_dyn.vx_dot = 1/m*(m*kesi_old.v_y*kesi_old.r+2*Fdrv-2*Frrr-2*Frrf-Fdrag-2*Fbf-2*Fbr-2*Ffy*sin(kesi_new.steering_angle));
+            // states_dot_dyn.vy_dot = 1/m*(-m*kesi_old.v_x*kesi_old.r+2*Fry+2*Ffy*cos(kesi_new.steering_angle));
+            // states_dot_dyn.r_dot = 1/Iz*((2*Ffy*cos(kesi_new.steering_angle))*lf-2*Fry*lr);
 
 
             // states_dot_kin = states_dot_dyn;
@@ -126,7 +126,7 @@ public:
             kesi_new.v_y = kesi_old.v_y + states_dot_all.vy_dot*dt;                 
             kesi_new.r = kesi_old.r + states_dot_all.r_dot*dt;
               
-            if(kesi_new.v_x<0){kesi_new.v_x=0.00001;kesi_new.v_y=0;kesi_new.r=0;} //kesi_new.v_y=0;kesi_new.r=10;
+            if(kesi_new.v_x<0){kesi_new.v_x=0.0001;kesi_new.v_y=0;kesi_new.r=0;} //kesi_new.v_y=0;kesi_new.r=10;
             cout<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<"\n"<<endl;
             kesi_old = kesi_new;
         }
