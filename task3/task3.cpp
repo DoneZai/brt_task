@@ -64,6 +64,7 @@ public:
 class DynaBicycleModel
 {
 private:
+    MagicTireModel Tire;
     Kesi kesi_new;
     Kesi kesi_old;
     states_dot states_dot_dyn;
@@ -72,6 +73,7 @@ private:
 
     double m=300,Iz=134,lf=0.721,lr=0.823,Cm=3600,Crr=200,Cd=1.53,Cbf=5411,Cbr=2650,Cx=20000;
     double Fdrv,Frrr,Frrf,Fdrag,Fbf,Fbr,Fry,Ffy,alpha_f,alpha_r;
+    double Fzf,Fzr,Fz0f,Fz0r;
 
 public:
     DynaBicycleModel() :kesi_new({0, 0, 0, 0, 0, 0, 0, 0, 0}),kesi_old({0.001, 0.001, 0.001, 20, 0, 0, 0, 0, 0}) {}
@@ -87,7 +89,11 @@ public:
             kesi_new.throttle = controll[i][0];
             kesi_new.steering_angle = controll[i][1];
             kesi_new.brakes = controll[i][2];
-
+            
+            Fz0f = lr*m*9.8/(2*(lf+lr));
+            Fz0r = lf*m*9.8/(2*(lf+lr)); 
+            Fzf = Fz0f;
+            Fzr = Fz0r;//real Fz, in this experiment considered as Fz0
             Fdrv = kesi_new.throttle*Cm*kesi_new.throttle;
             Frrr = Crr*tanh(kesi_old.v_x);
             Frrf = Crr*tanh(kesi_old.v_x);
@@ -103,8 +109,11 @@ public:
             // if (alpha_f<-0.087){alpha_f = -0.087;}
             // if (alpha_r<-0.087){alpha_r = -0.087;} //Ограничить угол скольжения шины линейной областью magic formula
 
-            Ffy = -Cx*alpha_f;
-            Fry = -Cx*alpha_r;
+            // Ffy = -Cx*alpha_f;
+            // Fry = -Cx*alpha_r;
+            Ffy = Tire.solveFy(alpha_f,Fzf,Fz0f);
+            Fry = Tire.solveFy(alpha_r,Fzr,Fz0r);
+
             cout<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Ffy<<" "<<Fry<<" "<<endl;
 
             states_dot_dyn.X_dot = kesi_old.v_x*cos(kesi_old.theta)-kesi_old.v_y*sin(kesi_old.theta);
@@ -162,12 +171,12 @@ public:
 
 int main(){
     DynaBicycleModel model1;
-    // model1.updatestate(0.5);
-    MagicTireModel Tire;
-    std::ofstream outputFile("output.txt");
-    for(double i=-0.5;i<=0.5;i+=0.01){
-    cout<<i<<" "<<Tire.solveFy(i,3000,3200)<<endl;
-    outputFile << i << " " << Tire.solveFy(i,3000,3200) << std::endl;}
-    outputFile.close(); 
+    model1.updatestate(0.5);
+    // MagicTireModel Tire;
+    // std::ofstream outputFile("output.txt");
+    // for(double i=-0.5;i<=0.5;i+=0.01){
+    // cout<<i<<" "<<Tire.solveFy(i,3000,3200)<<endl;
+    // outputFile << i << " " << Tire.solveFy(i,3000,3200) << std::endl;}
+    // outputFile.close(); 
 }
                               
