@@ -71,12 +71,12 @@ private:
     states_dot states_dot_kin;
     states_dot states_dot_all;
 
-    double m=300,Iz=134,lf=0.721,lr=0.823,Cm=3600,Crr=200,Cd=1.53,Cbf=5411,Cbr=2650,Cx=20000;
+    double m=300,Iz=134,lf=0.721,lr=0.823,Cm=3600,Crr=200,Cd=1.53,Cbf=5411,Cbr=2650;
     double Fdrv,Frrr,Frrf,Fdrag,Fbf,Fbr,Fry,Ffy,alpha_f,alpha_r;
     double Fzf,Fzr,Fz0f,Fz0r;
 
 public:
-    DynaBicycleModel() :kesi_new({0, 0, 0, 0, 0, 0, 0, 0, 0}),kesi_old({0.001, 0.001, 0.001, 20, 0, 0, 0, 0, 0}) {}
+    DynaBicycleModel() :kesi_new({0, 0, 0, 0, 0, 0, 0, 0, 0}),kesi_old({0.001, 0.001, 0.001, 10, 0, 0, 0, 0, 0}) {}
 
     void updatestate(double dt){
         int steps;
@@ -119,14 +119,19 @@ public:
             states_dot_dyn.X_dot = kesi_old.v_x*cos(kesi_old.theta)-kesi_old.v_y*sin(kesi_old.theta);
             states_dot_dyn.Y_dot = kesi_old.v_x*sin(kesi_old.theta)+kesi_old.v_y*cos(kesi_old.theta);
             states_dot_dyn.phi_dot = kesi_old.r;
-            states_dot_dyn.vx_dot = 1/m*(m*kesi_old.v_y*kesi_old.r+2*Fdrv-2*Frrr-2*Frrf*cos(kesi_new.steering_angle)
-                            -Fdrag*cos(atan(kesi_old.v_y/kesi_old.v_x))-2*Fbf*cos(kesi_new.steering_angle)
-                            -2*Fbr-2*Ffy*sin(kesi_new.steering_angle));
-            states_dot_dyn.vy_dot = 1/m*(-m*kesi_old.v_x*kesi_old.r+2*Fry+2*Ffy*cos(kesi_new.steering_angle)
+            states_dot_dyn.vx_dot = 1/m*(m*kesi_old.v_y*kesi_old.r+2*Fdrv
+                            -2*Frrr-2*Frrf*cos(kesi_new.steering_angle)
+                            -Fdrag*cos(atan(kesi_old.v_y/kesi_old.v_x))
+                            -2*Fbf*cos(kesi_new.steering_angle)-2*Fbr
+                            -2*Ffy*sin(kesi_new.steering_angle)
+                            );
+            states_dot_dyn.vy_dot = 1/m*(-m*kesi_old.v_x*kesi_old.r
+                            +2*Fry+2*Ffy*cos(kesi_new.steering_angle)
                             -2*(Frrf+Fbf)*sin(kesi_new.steering_angle)
                             -Fdrag*sin(atan(kesi_old.v_y/kesi_old.v_x)));
-            states_dot_dyn.r_dot = 1/Iz*((Ffy*cos(kesi_new.steering_angle)-Frrf*sin(kesi_new.steering_angle)
-                            -Fbf*sin(kesi_new.steering_angle))*lf-Fry*lr);
+            states_dot_dyn.r_dot = 1/Iz*(2*(Ffy*cos(kesi_new.steering_angle)
+                            -Frrf*sin(kesi_new.steering_angle)
+                            -Fbf*sin(kesi_new.steering_angle))*lf-2*Fry*lr);
 
             // states_dot_dyn.vx_dot = 1/m*(m*kesi_old.v_y*kesi_old.r+2*Fdrv-2*Frrr-2*Frrf-Fdrag-2*Fbf-2*Fbr-2*Ffy*sin(kesi_new.steering_angle));
             // states_dot_dyn.vy_dot = 1/m*(-m*kesi_old.v_x*kesi_old.r+2*Fry+2*Ffy*cos(kesi_new.steering_angle));
@@ -171,7 +176,7 @@ public:
 
 int main(){
     DynaBicycleModel model1;
-    model1.updatestate(0.5);
+    model1.updatestate(0.001);
     // MagicTireModel Tire;
     // std::ofstream outputFile("output.txt");
     // for(double i=-0.5;i<=0.5;i+=0.01){
