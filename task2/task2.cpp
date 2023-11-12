@@ -52,7 +52,7 @@ public:
     void updatestate(double dt){
         int steps;
         ifstream input("input.txt");
-        ofstream outputFile("output1.txt");
+        ofstream outputFile("output.txt");
         input>>steps;
        double thr,ste,bra;
 
