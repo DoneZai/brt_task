@@ -54,21 +54,24 @@ public:
         ifstream input("input.txt");
         ofstream outputFile("output1.txt");
         input>>steps;
-        double controll[steps][3]; 
+       double thr,ste,bra;
 
         for (int i = 0; i < steps; ++i) {
-                for(int j = 0; j<50;++j){
-                input >> controll[i][0] >> controll[i][1]>> controll[i][2];
-                kesi_new.throttle = max(controll[i][0],1e-6);
-                kesi_new.steering_angle = controll[i][1];
-                kesi_new.brakes = max(controll[i][2],1e-6);
-
-                Fdrv = min(3600.0,max(kesi_new.throttle*Cm*kesi_new.throttle,1e-10));
-                Frrr = max(Crr*tanh(kesi_old.v_x),1e-10);
-                Frrf = max(Crr*tanh(kesi_old.v_x),1e-10);
+                input >> thr >> ste >> bra;
+                kesi_new.throttle = thr;
+                kesi_new.steering_angle = ste;
+                kesi_new.brakes = bra;
+                // outputFile<<kesi_new.throttle<<" "<<kesi_new.steering_angle<<" "<<kesi_new.brakes<<endl;
+            for(int j = 0;j < 50; ++j){
+                
+                Fdrv = kesi_new.throttle*Cm*kesi_new.throttle,1e-10;
+                Frrr = Crr*tanh(kesi_old.v_x),1e-10;
+                Frrf = Crr*tanh(kesi_old.v_x),1e-10;
                 Fdrag = Cd*kesi_old.v_x*kesi_old.v_x;
-                Fbf = min(5411.0,max(kesi_new.brakes*Cbf*tanh(kesi_old.v_x),1e-10));
-                Fbr = min(2650.0,max(kesi_new.brakes*Cbr*tanh(kesi_old.v_x),1e-10));
+                // Fbf = min(5411.0,max(kesi_new.brakes*Cbf*tanh(kesi_old.v_x),1e-10));
+                // Fbr = min(2650.0,max(kesi_new.brakes*Cbr*tanh(kesi_old.v_x),1e-10));
+                Fbf = kesi_new.brakes*Cbf*tanh(kesi_old.v_x),1e-10;
+                Fbr = kesi_new.brakes*Cbr*tanh(kesi_old.v_x),1e-10;
                 alpha_f = atan2((kesi_old.v_y+lf*kesi_old.r),kesi_old.v_x)-kesi_new.steering_angle;
                 alpha_r = atan2((kesi_old.v_y-lr*kesi_old.r),kesi_old.v_x);
                 alpha_f = min(max(alpha_f,-0.1),0.1);
@@ -79,7 +82,7 @@ public:
                 if(abs(Fry)<1e-10)Ffy=0;
                 if(abs(Fry)<1e-10)Fry=0;
                 // cout<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Ffy<<" "<<Fry<<" "<<endl;
-                outputFile<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Ffy<<" "<<Fry<<" "<<endl;
+                // outputFile<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Ffy<<" "<<Fry<<" "<<endl;
 
                 states_dot_dyn.X_dot = kesi_old.v_x*cos(kesi_old.theta)-kesi_old.v_y*sin(kesi_old.theta);
                 states_dot_dyn.Y_dot = kesi_old.v_x*sin(kesi_old.theta)+kesi_old.v_y*cos(kesi_old.theta);
