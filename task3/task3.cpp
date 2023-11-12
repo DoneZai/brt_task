@@ -76,7 +76,7 @@ private:
     double Fzf,Fzr,Fz0f,Fz0r;
 
 public:
-    DynaBicycleModel() :kesi_new({0, 0, 0, 0, 0, 0, 0, 0, 0}),kesi_old({0.001, 0.001, 0.001, 10, 0, 0, 0, 0, 0}) {}
+    DynaBicycleModel() :kesi_new({0, 0, 0, 0, 0, 0, 0, 0, 0}),kesi_old({0.001, 0.001, 0.001, 0.0001, 0, 0, 0, 0, 0}) {}
 
     void updatestate(double dt){
         int steps;
@@ -103,18 +103,12 @@ public:
             alpha_f = atan2((kesi_old.v_y+lf*kesi_old.r),kesi_old.v_x)-kesi_new.steering_angle;
             alpha_r = atan2((kesi_old.v_y-lr*kesi_old.r),kesi_old.v_x);
 
-            // if(kesi_new.v_x<0.1){alpha_f = 0}
-            // if (alpha_f>0.087){alpha_f = 0.087;}
-            // if (alpha_r>0.087){alpha_r = 0.087;}
-            // if (alpha_f<-0.087){alpha_f = -0.087;}
-            // if (alpha_r<-0.087){alpha_r = -0.087;} //Ограничить угол скольжения шины линейной областью magic formula
-
             // Ffy = -Cx*alpha_f;
             // Fry = -Cx*alpha_r;
             Ffy = Tire.solveFy(alpha_f,Fzf,Fz0f);
             Fry = Tire.solveFy(alpha_r,Fzr,Fz0r);
 
-            cout<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Ffy<<" "<<Fry<<" "<<endl;
+            // cout<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Ffy<<" "<<Fry<<" "<<endl;
 
             states_dot_dyn.X_dot = kesi_old.v_x*cos(kesi_old.theta)-kesi_old.v_y*sin(kesi_old.theta);
             states_dot_dyn.Y_dot = kesi_old.v_x*sin(kesi_old.theta)+kesi_old.v_y*cos(kesi_old.theta);
