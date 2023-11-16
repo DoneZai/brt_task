@@ -3,7 +3,10 @@
         "ostream": "cpp",
         "iostream": "cpp",
         "fstream": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "cmath": "cpp",
+        "iosfwd": "cpp",
+        "complex": "cpp"
     },
     "python.autoComplete.extraPaths": [
         "/opt/ros/noetic/lib/python3/dist-packages"

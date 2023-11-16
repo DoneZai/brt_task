@@ -2,8 +2,8 @@
 #include <cmath>
 #include <fstream>
 
-#include "tire_constants.h" 
-#include "car_constants.h" 
+#include "../include/tire_constants.h" 
+#include "../include/car_constants.h" 
 
 using namespace std;
 using namespace TireConstants;
@@ -188,10 +188,10 @@ int main(){
     DynaBicycleModel model1;
     model1.updatestate(0.001);
     MagicTireModel Tire;
-    // std::ofstream outputFile("output_Fy.txt");
-    // for(float i=-0.5;i<=0.5;i+=0.01){
+    std::ofstream outputFile("output_Fy.txt");
+    for(float i=-0.5;i<=0.5;i+=0.01){
     // cout<<i<<" "<<Tire.solveFy(i,343)<<endl;
-    // outputFile << i << " " << Tire.solveFy(i,343) << std::endl;}
-    // outputFile.close(); 
+    outputFile << i << " " << Tire.solveFy(i,0) << std::endl;}
+    outputFile.close(); 
 }
                               

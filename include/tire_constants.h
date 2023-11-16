@@ -4,6 +4,7 @@
 namespace TireConstants {
     constexpr float R_tire = 0.235;
     constexpr float FNOMIN = 8.000e+002;
+    constexpr float VERTICAL_STIFFNESS = 8.837e+004;
 
     constexpr float pCy1 = 1.434;
     constexpr float lCy = 1;

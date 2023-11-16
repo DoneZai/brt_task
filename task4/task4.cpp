@@ -9,28 +9,28 @@ using namespace std;
 using namespace TireConstants;
 using namespace CarConstants;
 
-struct Kesi {
-    float X, Y, theta, v_x, v_y, r, omega_f,omega_r, throttle, steering_angle, brakes;
+class Kesi {
+public:
+    float X=0.0f, Y=0.0f, theta=0.0f, v_x=0.0f, v_y=0.0f, r=0.0f, omega_f=0.0f,omega_r=0.0f, throttle=0.0f, steering_angle=0.0f, brakes=0.0f;
 };
 
 class States_dot {
 public:
-    float X_dot, Y_dot, phi_dot,vx_dot,vy_dot,r_dot,omega_dot_f,omega_dot_r; 
+    float X_dot=0.0f, Y_dot=0.0f, phi_dot=0.0f,vx_dot=0.0f,vy_dot=0.0f,r_dot=0.0f,omega_dot_f=0.0f,omega_dot_r=0.0f; 
 
-    States_dot operator*=(float scalar) const {
-        States_dot result;
-        result.X_dot *= scalar;
-        result.Y_dot *= scalar;
-        result.phi_dot *= scalar;
-        result.vx_dot *= scalar;
-        result.vy_dot *= scalar;
-        result.r_dot *= scalar;
-        result.omega_dot_f *= scalar;
-        result.omega_dot_r *= scalar;
-        return result;
+    States_dot operator*=(float scalar) {
+        return States_dot{ 
+            this->X_dot * scalar, 
+            this->Y_dot * scalar, 
+            this->phi_dot * scalar, 
+            this->vx_dot * scalar, 
+            this->vy_dot * scalar,
+            this->r_dot * scalar,
+            this->omega_dot_f * scalar,
+            this->omega_dot_r * scalar };
     }
 
-    States_dot operator+(const States_dot& other) const {
+    States_dot operator+(const States_dot& other){
         States_dot result;
         result.X_dot = X_dot + other.X_dot;
         result.Y_dot = Y_dot + other.Y_dot;
@@ -43,16 +43,15 @@ public:
         return result;
     }
 
-    States_dot operator*(float scalar)const{
-        return *this*=scalar;
-        }
-
 };
-    States_dot operator*(float scalar,const States_dot& other){
-        return other*=scalar;
-        }
 
+States_dot operator*(float scalar,States_dot other){
+    return other*=scalar;
+    }
 
+States_dot operator*(States_dot other, float scalar) {
+    return other *= scalar;
+}
 
 Kesi operator+(const Kesi& kesi, const States_dot& states_dot) {
     Kesi result;
@@ -70,7 +69,6 @@ Kesi operator+(const Kesi& kesi, const States_dot& states_dot) {
     return result;
 }
 
-
 class MagicTireModel
 {
 private:
@@ -79,8 +77,6 @@ private:
     float Bx,Cx,Dx,Ex,Kx,SHx,SVx,mux;
     float gamma,gammax,gammay,alphay,kappax;
     float Fz0,Fz,dfz;
-    // float r_eff,r_stat ;
-    
 
     float sgn(float x){
         return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
@@ -132,20 +128,17 @@ public:
         kappax = kappa + SHx;
         Ex = (pEx1+pEx2*dfz+pEx3*dfz*dfz)*(1-pEx4*sgn(kappax))*lEx;
         float Fx0=Dx*sin(Cx*atan(Bx*kappax-Ex*(Bx*kappax-atan(Bx*kappax))))+SVx;
-        return Fx0;
+        return -Fx0;
     }
 
     float kappa(float vl, float omega){
         if(vl>r_eff()*omega&&vl!=0){
-            cout<<omega<<" braking "<<r_eff()*omega/vl-1<<endl;
             return r_eff()*omega/vl-1;
         }
         if(vl<r_eff()*omega&&omega!=0){
-            cout<<vl<<" speeding "<<1-vl/(r_eff()*omega)<<endl;
             return 1-vl/(r_eff()*omega);
         }
         else{
-            cout<<"nothing"<<endl;
             return 0;
         }
     }
@@ -164,10 +157,9 @@ private:
     float Fdrv,Frrr,Frrf,Fdrag,Fbf,Fbr,Fxf,Fxr,Fyf,Fyr,alpha_f,alpha_r,kappa_f,kappa_r;
 
 public:
-    DynaBicycleModel() :kesi_new({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),kesi_old({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
-                        states_dot_dyn({0, 0, 0, 0, 0, 0, 0, 0}){}
+    DynaBicycleModel(){}
 
-    States_dot calculateStatesDot(float thr,float ste,float bra, const Kesi& kesi) {
+    States_dot calculateStatesDot(float thr,float ste,float bra, Kesi kesi) {
         kesi_new.throttle = thr;
         kesi_new.steering_angle = ste;
         kesi_new.brakes = bra;
@@ -183,12 +175,13 @@ public:
         vxf = kesi.v_x;
         vxr = kesi.v_x;
         vyf = kesi.v_y + lf * kesi.r;
-        vyr = kesi.v_y-lr*kesi.r;
+        vyr = kesi.v_y-lr * kesi.r;
         alpha_f = atan2(vyf,vxf)-kesi_new.steering_angle;
         alpha_r = atan2(vyr,vxr);
         // longitudinal rear speed 
         vlf = vyf*sin(kesi_new.steering_angle)+vxf*cos(kesi_new.steering_angle);
         vlr = vxr;
+        kesi.omega_f = kesi.omega_r;
         kappa_f = Tire.kappa(vlf,kesi.omega_f);
         kappa_r = Tire.kappa(vlr,kesi.omega_r);
 
@@ -215,44 +208,37 @@ public:
                         -Frrf*sin(kesi_new.steering_angle));
                         
         states_dot_dyn.r_dot = 1/Iz*(2*(Fyf*cos(kesi_new.steering_angle)
-                        +Fxf*sin(kesi_new.steering_angle)
+                        +2*Fxf*sin(kesi_new.steering_angle)
                         -Frrf*sin(kesi_new.steering_angle))*lf
                         -2*Fyr*lr);
 
-        // states_dot_dyn.vx_dot = 1/m*(m*kesi.v_y*kesi.r+2*Fdrv
-        //                 -Frrr-Frrf*cos(kesi_new.steering_angle)
-        //                 -Fdrag-2*Fbf*cos(kesi_new.steering_angle)-2*Fbr
-        //                 -2*Fyf*sin(kesi_new.steering_angle)
-        //                 );
-        // states_dot_dyn.vy_dot = 1/m*(-m*kesi.v_x*kesi.r
-        //                 +2*Fyr+2*Fyf*cos(kesi_new.steering_angle)
-        //                 -(Frrf+2*Fbf)*sin(kesi_new.steering_angle));
-        // states_dot_dyn.r_dot = 1/Iz*((2*Fyf*cos(kesi_new.steering_angle)
-        //                 -Frrf*sin(kesi_new.steering_angle)
-        //                 -2*Fbf*sin(kesi_new.steering_angle))*lf-2*Fyr*lr);
-
-        states_dot_dyn.omega_dot_f = (Fdrv-Fbf-Fxf)*Tire.r_eff()/Iwz;
+        // states_dot_dyn.omega_dot_f = (Fdrv-Fbf-Fxf)*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_f = 0;
         states_dot_dyn.omega_dot_r = (Fdrv-Fbr-Fxr)*Tire.r_eff()/Iwz;
         
-
         return states_dot_dyn;
     }
     
 
-    Kesi rungeKutta(float thr,float ste,float bra, const Kesi& kesi, float h) {
+    Kesi rungeKutta(float thr,float ste,float bra, float h) {
 
-        States_dot k1 = calculateStatesDot(thr,ste,bra,kesi);
-        Kesi kesi_k1 = kesi + k1 * (h / 2.0);
+        States_dot k1 = calculateStatesDot(thr,ste,bra,kesi_old);
+        Kesi kesi_k1 = kesi_old + k1 * (h / 2.0);
 
         States_dot k2 = calculateStatesDot(thr,ste,bra,kesi_k1);
-        Kesi kesi_k2 = kesi + k2 * (h / 2.0);
+        Kesi kesi_k2 = kesi_old + k2 * (h / 2.0);
 
         States_dot k3 = calculateStatesDot(thr,ste,bra,kesi_k2);
-        Kesi kesi_k3 = kesi + k3 * h;
+        Kesi kesi_k3 = kesi_old + k3 * h;
 
         States_dot k4 = calculateStatesDot(thr,ste,bra,kesi_k3);
 
-    return kesi + (k1 + k2 *2.0 + k3 *2.0 + k4) * (h / 6.0);
+    return kesi_old + (k1 + k2 *2.0 + k3 *2.0 + k4) * (h / 6.0);
+    }
+
+    Kesi eulerIntegral(float thr,float ste,float bra, float h) {
+        States_dot k = calculateStatesDot(thr,ste,bra,kesi_old);
+    return kesi_old + h * k;
     }
 
     void updatestate(float dt){
@@ -265,26 +251,23 @@ public:
         for (int i = 0; i < steps; ++i) {
             input >> thr >> ste >> bra;
             for(int j = 0;j < 50; ++j){
-            outputFile<<states_dot_dyn.omega_dot_f<<" "<<states_dot_dyn.omega_dot_r<<endl;
  
             //Eular integral
-            // states_dot_dyn = calculateStatesDot(thr,ste,bra,kesi_old);
-            // kesi_new.X = kesi_old.X + states_dot_dyn.X_dot*dt;
-            // kesi_new.Y = kesi_old.Y + states_dot_dyn.Y_dot*dt;
-            // kesi_new.theta = kesi_old.theta +states_dot_dyn.phi_dot*dt;
-            // kesi_new.v_x = kesi_old.v_x + states_dot_dyn.vx_dot*dt;                
-            // kesi_new.v_y = kesi_old.v_y + states_dot_dyn.vy_dot*dt;                 
-            // kesi_new.r = kesi_old.r + states_dot_dyn.r_dot*dt;
-            // kesi_new.omega_f = kesi_old.omega_f + states_dot_dyn.omega_dot_f*dt;
-            // kesi_new.omega_r = kesi_old.omega_r + states_dot_dyn.omega_dot_r*dt;
+            // kesi_new = eulerIntegral(thr, ste, bra, dt);
 
-            kesi_new = rungeKutta(thr, ste, bra,kesi_old, dt);
+            //RungeKutta integral
+            kesi_new = rungeKutta(thr, ste, bra, dt);
+            kesi_new.omega_f = kesi_new.omega_r;
+            
+            // if((Fxf>0&&Fxr<0)||(Fxf<0&&Fxr>0))
+            outputFile<<Fxf<<" Lateral Force "<<Fxr<<"\n";
+            // outputFile<<thr<<" input "<<ste<<" "<<bra<<"\n";
+            // outputFile<<kappa_f<<" Kappa "<<kappa_r<<"\n";
+            // outputFile<<states_dot_dyn.omega_dot_f<<" OMEGA_DOT "<<states_dot_dyn.omega_dot_r<<"\n";
             outputFile<<i*0.05+j*dt<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_old.omega_f<<" "<<kesi_old.omega_r<<"\n"<<endl;
-            // outputFile<<kesi_new.r<<" "<<kesi_old.omega_f<<" "<<kesi_old.omega_r<<"\n"<<endl;
-            // outputFile<<Fxf<<" "<<Fyf<<" "<<Fxr<<" "<<Fyr<<"\n"<<endl;
+            
             // outputFile<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Fyf<<" "<<Fyr<<" "<<endl;
             kesi_old = kesi_new;
-
             }
         }
         // outputFile.close();
@@ -294,12 +277,12 @@ public:
 int main(){
     DynaBicycleModel model1;
     model1.updatestate(0.001);
-    // MagicTireModel Tire;
-    // std::ofstream outputFile("output_tire.txt");
-    // for(float i=-0.5;i<=0.5;i+=0.01){
-    // outputFile << i << " " << Tire.solveFy(i,0) << std::endl;
+    MagicTireModel Tire;
+    std::ofstream outputFile("output_tire.txt");
+    for(float i=-0.5;i<=0.5;i+=0.01){
+    outputFile << i << " " << Tire.solveFy(i) << std::endl;
     // outputFile << i << " " << Tire.solveFx(i) << std::endl;
-    // }
-    // outputFile.close(); 
+    }
+    outputFile.close(); 
 }
                               
