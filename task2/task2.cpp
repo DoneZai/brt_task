@@ -56,7 +56,7 @@ public:
         input>>steps;
        double thr,ste,bra;
 
-        for (int i = 0; i < steps; ++i) {
+        for (int i = 0; i <= steps; ++i) {
                 input >> thr >> ste >> bra;
                 kesi_new.throttle = thr;
                 kesi_new.steering_angle = ste;
@@ -143,9 +143,9 @@ public:
                 // if(abs(kesi_new.v_y)<1e-5){kesi_new.v_y=0.0001;}
                 // if(abs(kesi_new.r)<1e-5){kesi_new.r=0;}
                 // cout<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<"\n"<<endl;
-                outputFile<<i*0.05+j*dt<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<"\n"<<endl;
                 kesi_old = kesi_new;
             }
+                outputFile<<i*0.05<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<"\n"<<endl;
         }
         input.close();
         outputFile.close(); 
