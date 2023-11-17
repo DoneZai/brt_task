@@ -47,7 +47,7 @@ private:
     double Fdrv=0.0f,Frrr=0.0f,Frrf=0.0f,Fdrag=0.0f,Fbf=0.0f,Fbr=0.0f,Fry=0.0f,Ffy=0.0f,alpha_f=0.0f,alpha_r=0.0f;
 
 public:
-    DynaBicycleModel() :kesi_new({0, 0, 0, 0, 0, 0, 0, 0, 0}),kesi_old({0.001, 0.001, 0.001, 0.0001, 0, 0, 0, 0, 0}) {}
+    DynaBicycleModel() :kesi_new({0, 0, 0, 0, 0, 0, 0, 0, 0}),kesi_old({0, 0, 0, 0, 0, 0, 0, 0, 0}) {}
 
     void updatestate(double dt){
         int steps;
@@ -87,14 +87,13 @@ public:
                 states_dot_dyn.X_dot = kesi_old.v_x*cos(kesi_old.theta)-kesi_old.v_y*sin(kesi_old.theta);
                 states_dot_dyn.Y_dot = kesi_old.v_x*sin(kesi_old.theta)+kesi_old.v_y*cos(kesi_old.theta);
                 states_dot_dyn.phi_dot = kesi_old.r;
-                states_dot_dyn.vx_dot = 1/m*(m*kesi_old.v_y*kesi_old.r+2*Fdrv-2*Frrr-2*Frrf*cos(kesi_new.steering_angle)
-                                -Fdrag*cos(atan(kesi_old.v_y/kesi_old.v_x))-2*Fbf*cos(kesi_new.steering_angle)
+                states_dot_dyn.vx_dot = 1/m*(m*kesi_old.v_y*kesi_old.r+2*Fdrv-Frrr-Frrf*cos(kesi_new.steering_angle)
+                                -Fdrag-2*Fbf*cos(kesi_new.steering_angle)
                                 -2*Fbr-2*Ffy*sin(kesi_new.steering_angle));
                 states_dot_dyn.vy_dot = 1/m*(-m*kesi_old.v_x*kesi_old.r+2*Fry+2*Ffy*cos(kesi_new.steering_angle)
-                                -2*(Frrf+Fbf)*sin(kesi_new.steering_angle)
-                                -Fdrag*sin(atan(kesi_old.v_y/kesi_old.v_x)));
+                                -(Frrf+2*Fbf)*sin(kesi_new.steering_angle));
                 states_dot_dyn.r_dot = 1/Iz*((Ffy*cos(kesi_new.steering_angle)-Frrf*sin(kesi_new.steering_angle)
-                                -Fbf*sin(kesi_new.steering_angle))*lf-Fry*lr);
+                                -2*Fbf*sin(kesi_new.steering_angle))*lf-Fry*lr);
 
                 // states_dot_dyn.vx_dot = 1/m*(m*kesi_old.v_y*kesi_old.r+Fdrv-Frrr-Frrf*cos(kesi_new.steering_angle)
                 //                 -Fdrag*cos(atan(kesi_old.v_y/kesi_old.v_x))-Fbf*cos(kesi_new.steering_angle)
@@ -140,7 +139,7 @@ public:
                 kesi_new.v_y = kesi_old.v_y + states_dot_all.vy_dot*dt;                 
                 kesi_new.r = kesi_old.r + states_dot_all.r_dot*dt;
                 
-                if(kesi_new.v_x<0.0001){kesi_new.v_x=0.0001;} //kesi_new.v_y=0;kesi_new.r=0;
+                // if(kesi_new.v_x<0.0001){kesi_new.v_x=0.0001;} //kesi_new.v_y=0;kesi_new.r=0;
                 // if(abs(kesi_new.v_y)<1e-5){kesi_new.v_y=0.0001;}
                 // if(abs(kesi_new.r)<1e-5){kesi_new.r=0;}
                 // cout<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<"\n"<<endl;
