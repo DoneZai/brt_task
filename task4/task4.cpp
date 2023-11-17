@@ -259,11 +259,12 @@ public:
             //RungeKutta integral
             kesi_new = rungeKutta(thr, ste, bra, dt);
             
-            outputFile<<Fxf<<" Longitudinal Force "<<Fxr<<" "<<Fdrv<<" "<<Fbr<<" "<<Fbf<<"\n";
-            outputFile<<kappa_f<<" Kappa "<<kappa_r<<"\n";
-            outputFile<<states_dot_dyn.omega_dot_f<<" OMEGA_DOT "<<states_dot_dyn.omega_dot_r<<"\n";
-            outputFile<<i*0.05+j*dt<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_old.omega_f<<" "<<kesi_old.omega_r<<"\n"<<endl;
-            // outputFile<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Fyf<<" "<<Fyr<<" "<<endl;
+            outputFile<<" Longitudinal Force "<<Fxf<<""<<Fxr<<" "<<Fdrv<<" "<<Fbr<<" "<<Fbf<<"\n";
+            outputFile<<" vlf "<<vlf<<" "<<kesi_old.omega_f<<"\n";
+            outputFile<<" Kappaf "<<Tire.kappa(vlf,kesi_old.omega_f)<<"\n";
+            outputFile<<" Kappa "<<kappa_f<<" "<<kappa_r<<"\n";
+            outputFile<<" OMEGA_DOT "<<states_dot_dyn.omega_dot_f<<" "<<states_dot_dyn.omega_dot_r<<"\n";
+            outputFile<<i*0.05+j*dt<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_new.omega_f<<" "<<kesi_new.omega_r<<"\n"<<endl;
             kesi_old = kesi_new;
             }
         }
