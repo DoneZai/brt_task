@@ -72,7 +72,6 @@ public:
         float Fy0=Dy*sin(Cy*atan(By*alphay-Ey*(By*alphay-atan(By*alphay))))+SVy;
         return Fy0;
     }
-// haven't finished yet :(
 
 };
 
