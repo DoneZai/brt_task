@@ -107,7 +107,6 @@ public:
         Cx = pCx1*lCx;
         Dx = mux*Fz;
         Bx = Kx/(Cx*Dx);
-        // cout<<gammax<<" "<<SHx<<" "<<SVx<<" "<<Kx<<" "<<mux<<" "<<Cx<<" "<<Dx<<" "<<Bx<<" "<<Ex<<" "<<endl;
     }
     
     float r_stat(){ 
@@ -133,9 +132,11 @@ public:
 
     float kappa(float vl, float omega){
         if(vl>r_eff()*omega&&vl!=0){
+            //Braking kappa<0
             return r_eff()*omega/vl-1;
         }
         if(vl<r_eff()*omega&&omega!=0){
+            //Speeding up kappa>0
             return 1-vl/(r_eff()*omega);
         }
         else{
@@ -172,16 +173,17 @@ public:
         Frrr = Crr*tanh(kesi.v_x);
         Frrf = Crr*tanh(kesi.v_x);
         Fdrag = Cd*kesi.v_x*kesi.v_x;
+
         vxf = kesi.v_x;
         vxr = kesi.v_x;
         vyf = kesi.v_y + lf * kesi.r;
         vyr = kesi.v_y-lr * kesi.r;
         alpha_f = atan2(vyf,vxf)-kesi_new.steering_angle;
         alpha_r = atan2(vyr,vxr);
+
         // longitudinal rear speed 
         vlf = vyf*sin(kesi_new.steering_angle)+vxf*cos(kesi_new.steering_angle);
         vlr = vxr;
-        kesi.omega_f = kesi.omega_r;
         kappa_f = Tire.kappa(vlf,kesi.omega_f);
         kappa_r = Tire.kappa(vlr,kesi.omega_r);
 
@@ -198,23 +200,22 @@ public:
         states_dot_dyn.vx_dot = 1/m*(m*kesi.v_y*kesi.r
                         //+2*Fdrv-2*Fbf*cos(kesi_new.steering_angle)-2*Fbr
                         +2*Fxf*cos(kesi_new.steering_angle)+2*Fxr
-                        -Frrr-Frrf*cos(kesi_new.steering_angle)
+                        // -Frrr-Frrf*cos(kesi_new.steering_angle)
                         -Fdrag-2*Fyf*sin(kesi_new.steering_angle)
                         );
         states_dot_dyn.vy_dot = 1/m*(-m*kesi.v_x*kesi.r
                         +2*Fxf*sin(kesi_new.steering_angle)
-                        +2*Fyf*cos(kesi_new.steering_angle)+2*Fyr
+                        +2*Fyf*cos(kesi_new.steering_angle)+2*Fyr);
                         // -(Frrf+2*Fbf)*sin(kesi_new.steering_angle));
-                        -Frrf*sin(kesi_new.steering_angle));
+                        // -Frrf*sin(kesi_new.steering_angle));
                         
         states_dot_dyn.r_dot = 1/Iz*(2*(Fyf*cos(kesi_new.steering_angle)
-                        +2*Fxf*sin(kesi_new.steering_angle)
-                        -Frrf*sin(kesi_new.steering_angle))*lf
+                        +2*Fxf*sin(kesi_new.steering_angle))*lf
+                        // -Frrf*sin(kesi_new.steering_angle))*lf
                         -2*Fyr*lr);
 
-        // states_dot_dyn.omega_dot_f = (Fdrv-Fbf-Fxf)*Tire.r_eff()/Iwz;
-        states_dot_dyn.omega_dot_f = 0;
-        states_dot_dyn.omega_dot_r = (Fdrv-Fbr-Fxr)*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_f = (Fxf-Fbf-Frrf/2)*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_r = (Fdrv-Fbr-Fxr-Frrr/2)*Tire.r_eff()/Iwz;
         
         return states_dot_dyn;
     }
@@ -233,7 +234,7 @@ public:
 
         States_dot k4 = calculateStatesDot(thr,ste,bra,kesi_k3);
 
-    return kesi_old + (k1 + k2 *2.0 + k3 *2.0 + k4) * (h / 6.0);
+    return kesi_old + (k1 + 2.0 * k2 + 2.0 * k3  + k4) * (h / 6.0);
     }
 
     Kesi eulerIntegral(float thr,float ste,float bra, float h) {
@@ -257,32 +258,27 @@ public:
 
             //RungeKutta integral
             kesi_new = rungeKutta(thr, ste, bra, dt);
-            kesi_new.omega_f = kesi_new.omega_r;
             
-            // if((Fxf>0&&Fxr<0)||(Fxf<0&&Fxr>0))
-            outputFile<<Fxf<<" Lateral Force "<<Fxr<<"\n";
-            // outputFile<<thr<<" input "<<ste<<" "<<bra<<"\n";
-            // outputFile<<kappa_f<<" Kappa "<<kappa_r<<"\n";
-            // outputFile<<states_dot_dyn.omega_dot_f<<" OMEGA_DOT "<<states_dot_dyn.omega_dot_r<<"\n";
+            outputFile<<Fxf<<" Longitudinal Force "<<Fxr<<" "<<Fdrv<<" "<<Fbr<<" "<<Fbf<<"\n";
+            outputFile<<kappa_f<<" Kappa "<<kappa_r<<"\n";
+            outputFile<<states_dot_dyn.omega_dot_f<<" OMEGA_DOT "<<states_dot_dyn.omega_dot_r<<"\n";
             outputFile<<i*0.05+j*dt<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_old.omega_f<<" "<<kesi_old.omega_r<<"\n"<<endl;
-            
             // outputFile<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Fyf<<" "<<Fyr<<" "<<endl;
             kesi_old = kesi_new;
             }
         }
-        // outputFile.close();
     }
 };
 
 int main(){
     DynaBicycleModel model1;
     model1.updatestate(0.001);
-    MagicTireModel Tire;
-    std::ofstream outputFile("output_tire.txt");
-    for(float i=-0.5;i<=0.5;i+=0.01){
-    outputFile << i << " " << Tire.solveFy(i) << std::endl;
+    // MagicTireModel Tire;
+    // std::ofstream outputFile("output_tire.txt");
+    // for(float i=-0.5;i<=0.5;i+=0.01){
+    // // outputFile << i << " " << Tire.solveFy(i) << std::endl;
     // outputFile << i << " " << Tire.solveFx(i) << std::endl;
-    }
-    outputFile.close(); 
+    // }
+    // outputFile.close(); 
 }
                               
