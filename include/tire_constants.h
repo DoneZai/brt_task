@@ -1,3 +1,4 @@
+#pragma once
 #ifndef TIRE_CONSTANTS_H_
 #define TIRE_CONSTANTS_H_
 
@@ -55,6 +56,35 @@ namespace TireConstants {
     constexpr float lVx = 1;
     constexpr float lmux = 1;
     constexpr float lgammax = 1;
+
+    constexpr float rBy1 = 20.33;
+    constexpr float rBy2 = 8.152;
+    constexpr float rBy3 = -1.243e-2;
+    constexpr float rCy1 = 0.9317;
+    constexpr float rEy1 = -3.982e-4;
+    constexpr float rEy2 = 3.077e-1;
+    constexpr float rHy1 = 0;
+    constexpr float rHy2 = 0;
+    constexpr float rVy1= 0;
+    constexpr float rVy2 = 0;
+    constexpr float rVy3 = 0;
+    constexpr float rVy4 = 0;
+    constexpr float rVy5 = 0;
+    constexpr float rVy6 = 0;
+    constexpr float lyk = 1;
+    constexpr float lVyk = 1;
+
+    constexpr float rBx1 = 20.33;
+    constexpr float rBx2 = 8.152;
+    constexpr float rCx1 = 0.9317;
+    constexpr float rEx1 = -3.982e-4;
+    constexpr float rEx2 = 3.077e-1;
+    constexpr float rHx1 = 0;
+    constexpr float rVy5 = 0;
+    constexpr float rVy6 = 0;
+    constexpr float lyk = 1;
+    constexpr float lVyk = 1;
+    
 
 }  
 

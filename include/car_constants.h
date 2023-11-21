@@ -1,3 +1,4 @@
+#pragma once
 #ifndef CAR_CONSTANTS_H_
 #define CAR_CONSTANTS_H_
 
