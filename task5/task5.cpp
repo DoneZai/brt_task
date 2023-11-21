@@ -75,7 +75,8 @@ private:
     // float Fz0;
     float By,Cy,Dy,Ey,Ky,SHy,SVy,muy;
     float Bx,Cx,Dx,Ex,Kx,SHx,SVx,mux;
-    float Byk,Cyk,Dyk,DVyk,Eyk,Gyk,SHyk,SVyk,muy;
+    float Byk,Cyk,Dyk,DVyk,Eyk,Gyk,SHyk,SVyk;
+    float Bxa,Cxa,Dxa,Exa,Gxa,SHxa;
     float gamma,gammax,gammay,alphay,kappax,alpha_s,kappa_s;
     float Fz0,Fz,dfz;
 
@@ -134,7 +135,7 @@ public:
         return -Fx0;
     }
 
-    float solveFyCombined(float alpha,float kappa){
+    float solveFyCombined(float alpha, float kappa){
         float Fy0=solveFy(alpha);
         Byk = rBy1*cos(atan(rBy2*(alpha - rBy3)))*lyk;
         Cyk = rCy1;
@@ -144,34 +145,19 @@ public:
         SHyk = rHy1 + rHy2*dfz;
         kappa_s = kappa + SHyk;
         SVyk = DVyk*sin(rVy5*atan(rVy6*kappa))*lVyk;
-        float Fy = Dyk*cos(Cyk*atan(Byk*kappa_s-Eyk*(Byk*kappa_s-atan(Byk*kappa_s))))+SVyk;
-        return Fy;
+        return Dyk*cos(Cyk*atan(Byk*kappa_s-Eyk*(Byk*kappa_s-atan(Byk*kappa_s))))+SVyk;
     }
     
     float solveFxCombined(float alpha, float kappa){
         float Fx0 = solveFx(kappa);
         Bxa = rBx1*cos(atan(rBx2*kappa))*lxa;
         Cxa = rCx1;
-        Dxa = Fx0/(cos(Cxa*atan(Bxa*SHxa-Exa*(Bxa*SHxa-atan(Bxa*SHxa)))))
-        Exz = rEx1 + rEx2*dfz;
-        Shxa = rHx1;
-        Fx0=1;
-        return Fx;
+        Dxa = Fx0/(cos(Cxa*atan(Bxa*SHxa-Exa*(Bxa*SHxa-atan(Bxa*SHxa)))));
+        Exa = rEx1 + rEx2*dfz;
+        SHxa = rHx1;
+        alpha_s = alpha + SHxa;
+        return Dxa*cos(Cxa*atan(Bxa*alpha_s-Exa*(Bxa*alpha_s-atan(Bxa*alpha_s))));
     }
-
-    // float kappa(float vl, float omega){
-    //     if(vl>r_eff()*omega&&vl!=0){
-    //         //kappa<0
-    //         return r_eff()*omega/vl-1;
-    //     }
-    //     if(vl<r_eff()*omega&&omega!=0){
-    //         //kappa>0
-    //         return 1-vl/(r_eff()*omega);
-    //     }
-    //     else{
-    //         return 0;
-    //     }
-    // }
  
     float kappa(float vl, float omega){
 
@@ -221,10 +207,17 @@ public:
         kappa_f = Tire.kappa(vlf,kesi.omega_f);
         kappa_r = Tire.kappa(vlr,kesi.omega_r);
 
-        Fyf = Tire.solveFy(alpha_f);
-        Fyr = Tire.solveFy(alpha_r);
-        Fxf = Tire.solveFx(kappa_f);
-        Fxr = Tire.solveFx(kappa_r);
+        // Fyf = Tire.solveFy(alpha_f);
+        // Fyr = Tire.solveFy(alpha_r);
+        // Fxf = Tire.solveFx(kappa_f);
+        // Fxr = Tire.solveFx(kappa_r);
+
+        Fyf = Tire.solveFyCombined(alpha_f,kappa_f);
+        Fyr = Tire.solveFyCombined(alpha_r,kappa_r);
+        Fxf = Tire.solveFxCombined(alpha_f,kappa_f);
+        Fxr = Tire.solveFxCombined(alpha_r,kappa_r);
+
+
 
         // cout<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Fyf<<" "<<Fyr<<" "<<endl;
 
