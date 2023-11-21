@@ -127,21 +127,27 @@ public:
         kappax = kappa + SHx;
         Ex = (pEx1+pEx2*dfz+pEx3*dfz*dfz)*(1-pEx4*sgn(kappax))*lEx;
         float Fx0=Dx*sin(Cx*atan(Bx*kappax-Ex*(Bx*kappax-atan(Bx*kappax))))+SVx;
+        // cout<<Bx<<" "<<" "<<Cx<<" "<<Dx<<" "<<Ex<<endl;
         return -Fx0;
     }
 
+    // float kappa(float vl, float omega){
+    //     if(vl>r_eff()*omega&&vl!=0){
+    //         //kappa<0
+    //         return r_eff()*omega/vl-1;
+    //     }
+    //     if(vl<r_eff()*omega&&omega!=0){
+    //         //kappa>0
+    //         return 1-vl/(r_eff()*omega);
+    //     }
+    //     else{
+    //         return 0;
+    //     }
+    // }
+ 
     float kappa(float vl, float omega){
-        if(vl>r_eff()*omega&&vl!=0){
-            //Braking kappa<0
-            return r_eff()*omega/vl-1;
-        }
-        if(vl<r_eff()*omega&&omega!=0){
-            //Speeding up kappa>0
-            return 1-vl/(r_eff()*omega);
-        }
-        else{
-            return 0;
-        }
+
+            return (omega*r_eff()-vl)/(max(1.0f, vl)); ;
     }
 
 };
@@ -214,7 +220,7 @@ public:
                         -Frrf*sin(kesi_new.steering_angle))*lf
                         -2*Fyr*lr);
 
-        states_dot_dyn.omega_dot_f = (Fxf-Fbf-Frrf/2)*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_f = -(Fxf-Fbf-Frrf/2)*Tire.r_eff()/Iwz;
         states_dot_dyn.omega_dot_r = (Fdrv-Fbr-Fxr-Frrr/2)*Tire.r_eff()/Iwz;
         
         return states_dot_dyn;
@@ -222,28 +228,28 @@ public:
     
 
     Kesi rungeKutta(float thr,float ste,float bra, float h) {
-        ofstream outputFile1("output1.txt",std::ios_base::app);
+        // ofstream outputFile1("output1.txt",std::ios_base::app);
 
-        outputFile1<<"1 "<<Tire.kappa(vlf,kesi_old.omega_f)<<endl;
+        // outputFile1<<"1 "<<Tire.kappa(vlf,kesi_old.omega_f)<<endl;
 
         States_dot k1 = calculateStatesDot(thr,ste,bra,kesi_old);
         Kesi kesi_k1 = kesi_old + k1 * (h / 2.0);
-        outputFile1<<"2 "<<Tire.kappa(vlf,kesi_k1.omega_f)<<endl;
+        // outputFile1<<"2 "<<Tire.kappa(vlf,kesi_k1.omega_f)<<endl;
 
         States_dot k2 = calculateStatesDot(thr,ste,bra,kesi_k1);
         Kesi kesi_k2 = kesi_old + k2 * (h / 2.0);
-        outputFile1<<"3 "<<Tire.kappa(vlf,kesi_k2.omega_f)<<endl;
+        // outputFile1<<"3 "<<Tire.kappa(vlf,kesi_k2.omega_f)<<endl;
 
         States_dot k3 = calculateStatesDot(thr,ste,bra,kesi_k2);
         Kesi kesi_k3 = kesi_old + k3 * h;
-        outputFile1<<"4 "<<Tire.kappa(vlf,kesi_k3.omega_f)<<endl;
+        // outputFile1<<"4 "<<Tire.kappa(vlf,kesi_k3.omega_f)<<endl;
 
         States_dot k4 = calculateStatesDot(thr,ste,bra,kesi_k3);
         States_dot k_result = (k1 + 2.0 * k2 + 2.0 * k3  + k4);
-        outputFile1<<"result_dot "<<k_result.omega_dot_f<<" "<<k_result.omega_dot_r<<endl;
+        // outputFile1<<"result_dot "<<k_result.omega_dot_f<<" "<<k_result.omega_dot_r<<endl;
         
         Kesi kesi_result = kesi_old + (k1 + 2.0 * k2 + 2.0 * k3  + k4) * (h / 6.0);
-        outputFile1<<"5 "<<Tire.kappa(vlf,kesi_result.omega_f)<<endl;
+        // outputFile1<<"5 "<<Tire.kappa(vlf,kesi_result.omega_f)<<endl;
 
     return kesi_old + (k1 + 2.0 * k2 + 2.0 * k3  + k4) * (h / 6.0);
     }
@@ -260,7 +266,7 @@ public:
         input>>steps;
         float thr,ste,bra;
 
-        for (int i = 0; i < steps; ++i) {
+        for (int i = 0; i <= steps; ++i) {
             input >> thr >> ste >> bra;
             for(int j = 0;j < 50; ++j){
  
@@ -268,17 +274,17 @@ public:
             // kesi_new = eulerIntegral(thr, ste, bra, dt);
 
             //RungeKutta integral
-            outputFile<<"before vlf "<<vlf<<" "<<kesi_old.omega_f*Tire.r_eff()<<" "<<Tire.kappa(vlf,kesi_old.omega_f)<<"\n";
+            // outputFile<<"before vlf "<<vlf<<" "<<kesi_old.omega_f*Tire.r_eff()<<" "<<Tire.kappa(vlf,kesi_old.omega_f)<<"\n";
             
             kesi_new = rungeKutta(thr, ste, bra, dt);
             
-            outputFile<<" Longitudinal Force "<<Fxf<<" "<<Fxr<<" "<<Fdrv<<" "<<Fbf<<" "<<Fbr<<"\n";
-            outputFile<<" vlf "<<vlf<<" "<<kesi_old.omega_f*Tire.r_eff()<<" "<<Tire.kappa(vlf,kesi_old.omega_f)<<"\n";
-            outputFile<<" Kappa "<<kappa_f<<" "<<kappa_r<<"\n";
-            outputFile<<" OMEGA_DOT "<<states_dot_dyn.omega_dot_f<<" "<<states_dot_dyn.omega_dot_r<<"\n";
-            outputFile<<i*0.05+j*dt<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_new.omega_f<<" "<<kesi_new.omega_r<<"\n"<<endl;
+            // outputFile<<" Longitudinal FDRV="<<Fdrv<<" FXR="<<Fxr<<" FXF="<<Fxf<<" FRRF="<<Frrf<<" FBF="<<Fbf<<" FBR="<<Fbr<<"\n";
+            // outputFile<<" vlf "<<vlf<<" "<<kesi_old.omega_f*Tire.r_eff()<<" "<<Tire.kappa(vlf,kesi_old.omega_f)<<"\n";
+            // outputFile<<" Kappa "<<kappa_f<<" "<<kappa_r<<"\n";
+            // outputFile<<" OMEGA_DOT "<<states_dot_dyn.omega_dot_f<<" "<<states_dot_dyn.omega_dot_r<<"\n";
             kesi_old = kesi_new;
             }
+            outputFile<<i*0.05<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_new.omega_f<<" "<<kesi_new.omega_r<<"\n"<<endl;
         }
     }
 };
@@ -288,7 +294,7 @@ int main(){
     model1.updatestate(0.001);
     // MagicTireModel Tire;
     // std::ofstream outputFile("output_tire.txt");
-    // for(float i=-0.5;i<=0.5;i+=0.01){
+    // for(float i=-100;i<=100;i+=0.01){
     // // outputFile << i << " " << Tire.solveFy(i) << std::endl;
     // outputFile << i << " " << Tire.solveFx(i) << std::endl;
     // }
