@@ -147,7 +147,7 @@ public:
  
     float kappa(float vl, float omega){
 
-            return (omega*r_eff()-vl)/(max(1.0f, vl)); ;
+            return (omega*r_eff()-vl)/(max(0.1f, vl)); ;
     }
 
 };
@@ -278,7 +278,8 @@ public:
             
             kesi_new = rungeKutta(thr, ste, bra, dt);
             
-            // outputFile<<" Longitudinal FDRV="<<Fdrv<<" FXR="<<Fxr<<" FXF="<<Fxf<<" FRRF="<<Frrf<<" FBF="<<Fbf<<" FBR="<<Fbr<<"\n";
+            // outputFile<<" Long FDRV="<<Fdrv<<" FXR="<<Fxr<<" FXF="<<Fxf<<" FRRF="<<Frrf<<" FBF="<<Fbf<<" FBR="<<Fbr<<"\n";
+            // outputFile<<i*0.05+j*dt<<" FXR="<<Fxr<<" FXF="<<Fxf<<" Fxr+Fxf="<<Fxr+Fxf<<" "<<"FDRV="<<Fdrv<<" "<<kesi_new.v_x<<"\n";
             // outputFile<<" vlf "<<vlf<<" "<<kesi_old.omega_f*Tire.r_eff()<<" "<<Tire.kappa(vlf,kesi_old.omega_f)<<"\n";
             // outputFile<<" Kappa "<<kappa_f<<" "<<kappa_r<<"\n";
             // outputFile<<" OMEGA_DOT "<<states_dot_dyn.omega_dot_f<<" "<<states_dot_dyn.omega_dot_r<<"\n";
