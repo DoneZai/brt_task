@@ -74,16 +74,13 @@ namespace TireConstants {
     constexpr float lyk = 1;
     constexpr float lVyk = 1;
 
-    constexpr float rBx1 = 20.33;
-    constexpr float rBx2 = 8.152;
-    constexpr float rCx1 = 0.9317;
-    constexpr float rEx1 = -3.982e-4;
-    constexpr float rEx2 = 3.077e-1;
+    constexpr float rBx1 = 2.372e1;
+    constexpr float rBx2 = 2.597e1;
+    constexpr float rCx1 = 7.495e-1;
+    constexpr float rEx1 = -4.759e-1;
+    constexpr float rEx2 = 8.109e-1;
     constexpr float rHx1 = 0;
-    constexpr float rVy5 = 0;
-    constexpr float rVy6 = 0;
-    constexpr float lyk = 1;
-    constexpr float lVyk = 1;
+    constexpr float lxa = 1;
     
 
 }  
