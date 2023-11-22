@@ -236,7 +236,7 @@ public:
                         // -(Frrf+2*Fbf)*sin(kesi_new.steering_angle));
                         -Frrf*sin(kesi_new.steering_angle));
                         
-        states_dot_dyn.r_dot = 1/Iz*(2*(Fyf*cos(kesi_new.steering_angle)
+        states_dot_dyn.r_dot = 1/Iz*((2*Fyf*cos(kesi_new.steering_angle)
                         +2*Fxf*sin(kesi_new.steering_angle)
                         -Frrf*sin(kesi_new.steering_angle))*lf
                         -2*Fyr*lr);
