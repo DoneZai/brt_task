@@ -49,26 +49,28 @@ class MagicTireModel
 {
 private:
     float By,Cy,Dy,Ey,Ky,SHy,SVy,muy;
-    float gammay,alphay;
+    float gamma, gammay,alphay;
     float Fz0,Fz,dfz;
     
 public:
-    MagicTireModel(){}
-
-    float solveFy(float alpha, float gamma){
+    MagicTireModel(){
         Fz0 = FNOMIN;
         Fz = m*9.8/4;
         dfz = (Fz-Fz0*lFz0)/Fz0*lFz0;
+        gamma = 0;
         gammay = gamma*lgammay;
         SHy = (pHy1+pHy2*dfz)*lHy + pHy3*gammay;
         SVy = Fz*((pVy1+pVy2*dfz)*lVy+(pVy3+pVy4*dfz)*gammay)*lmuy;
-        alphay = alpha+SHy;
         Ky = pKy1*Fz0*sin(2*atan(Fz/(pKy2*Fz0*lFz0)))*(1-pKy3*abs(gammay))*lFz0*lKy;
         muy = (pDy1+pDy2*dfz)*(1-pDy3*gammay*gammay)*lmuy;
         Cy = pCy1*lCy;
         Dy = muy*Fz;
         By = Ky/(Cy*Dy);
         Ey = (pEy1+pEy2*dfz);
+    }
+
+    float solveFy(float alpha, float gamma){
+        alphay = alpha+SHy;
         float Fy0=Dy*sin(Cy*atan(By*alphay-Ey*(By*alphay-atan(By*alphay))))+SVy;
         return Fy0;
     }
