@@ -69,7 +69,7 @@ public:
         Ey = (pEy1+pEy2*dfz);
     }
 
-    float solveFy(float alpha, float gamma){
+    float solveFy(float alpha){
         alphay = alpha+SHy;
         float Fy0=Dy*sin(Cy*atan(By*alphay-Ey*(By*alphay-atan(By*alphay))))+SVy;
         return Fy0;
@@ -122,8 +122,8 @@ public:
             alpha_f = atan2((kesi_old.v_y+lf*kesi_old.r),kesi_old.v_x)-kesi_new.steering_angle;
             alpha_r = atan2((kesi_old.v_y-lr*kesi_old.r),kesi_old.v_x);
 
-            Ffy = 2 * Tire.solveFy(alpha_f,0);
-            Fry = 2 * Tire.solveFy(alpha_r,0);
+            Ffy = 2 * Tire.solveFy(alpha_f);
+            Fry = 2 * Tire.solveFy(alpha_r);
             // cout<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Ffy<<" "<<Fry<<" "<<endl;
             // outputFile<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Ffy<<" "<<Fry<<" "<<endl;
 
