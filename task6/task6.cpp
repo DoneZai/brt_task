@@ -194,7 +194,7 @@ public:
 
         // Fzf = lr*m*9.8/(4*(lf+lr));
         // Fzr = lf*m*9.8/(4*(lf+lr)); 
-        Fdrv = kesi_new.throttle*Cm*kesi_new.throttle;
+        Fdrv = kesi_new.throttle*Cm;
         Fbf = kesi_new.brakes*Cbf*tanh(kesi.v_x);
         Fbr = kesi_new.brakes*Cbr*tanh(kesi.v_x);
         Frrr = Crr*tanh(kesi.v_x);
@@ -241,7 +241,6 @@ public:
         states_dot_dyn.Y_dot = kesi.v_x*sin(kesi.theta)+kesi.v_y*cos(kesi.theta);
         states_dot_dyn.phi_dot = kesi.r;
         states_dot_dyn.vx_dot = 1/m*(m*kesi.v_y*kesi.r
-                        //+2*Fdrv-2*Fbf*cos(kesi_new.steering_angle)-2*Fbr
                         +(Fxfl+Fxfr)*cos(kesi_new.steering_angle)+Fxrl+Fxrr
                         -Frrr-Frrf*cos(kesi_new.steering_angle)
                         -Fdrag-(Fyfl+Fyfr)*sin(kesi_new.steering_angle)
@@ -249,7 +248,6 @@ public:
         states_dot_dyn.vy_dot = 1/m*(-m*kesi.v_x*kesi.r
                         +(Fxfl+Fxfr)*sin(kesi_new.steering_angle)
                         +(Fyfl+Fyfr)*cos(kesi_new.steering_angle)+(Fyrl+Fyrr)
-                        // -(Frrf+2*Fbf)*sin(kesi_new.steering_angle));
                         -Frrf*sin(kesi_new.steering_angle));
                         
         states_dot_dyn.r_dot = 1/Iz*(((Fyfl+Fyfr)*cos(kesi_new.steering_angle)
@@ -313,8 +311,6 @@ public:
             // kesi_new = eulerIntegral(thr, ste, bra, dt);
 
             //RungeKutta integral
-            // outputFile<<"before vlf "<<vlf<<" "<<kesi_old.omega_f*Tire.r_eff()<<" "<<Tire.kappa(vlf,kesi_old.omega_f)<<"\n";
-            
             kesi_new = rungeKutta(thr, ste, bra, dt);
             
             // outputFile<<" Longitudinal FDRV="<<Fdrv<<" FXR="<<Fxr<<" FXF="<<Fxf<<" FRRF="<<Frrf<<" FBF="<<Fbf<<" FBR="<<Fbr<<"\n";
@@ -324,6 +320,7 @@ public:
             kesi_old = kesi_new;
             }
             outputFile<<i*0.05<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_new.omega_f_l<<" "<<kesi_new.omega_f_r<<" "<<kesi_new.omega_r_l<<" "<<kesi_new.omega_r_r<<"\n"<<endl;
+            cout<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<endl;
         }
     }
 };
