@@ -147,7 +147,7 @@ public:
  
     float kappa(float vl, float omega){
 
-            return (omega*r_eff()-vl)/(max(0.1f, vl)); ;
+            return (omega*r_eff()-vl)/(max(1.0f, vl)); ;
     }
 
 };
@@ -203,6 +203,7 @@ public:
         states_dot_dyn.X_dot = kesi.v_x*cos(kesi.theta)-kesi.v_y*sin(kesi.theta);
         states_dot_dyn.Y_dot = kesi.v_x*sin(kesi.theta)+kesi.v_y*cos(kesi.theta);
         states_dot_dyn.phi_dot = kesi.r;
+
         states_dot_dyn.vx_dot = 1/m*(m*kesi.v_y*kesi.r
                         +Fxf*cos(kesi_new.steering_angle)+Fxr
                         -Frrr-Frrf*cos(kesi_new.steering_angle)
@@ -218,7 +219,7 @@ public:
                         -Frrf*sin(kesi_new.steering_angle))*lf
                         -Fyr*lr);
 
-        states_dot_dyn.omega_dot_f = -(Fxf-Fbf-Frrf)/2*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_f = -(Fxf+Fbf+Frrf)/2*Tire.r_eff()/Iwz;
         states_dot_dyn.omega_dot_r = (Fdrv-Fbr-Fxr-Frrr)/2*Tire.r_eff()/Iwz;
         
         return states_dot_dyn;
