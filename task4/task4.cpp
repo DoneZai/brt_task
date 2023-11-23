@@ -173,7 +173,7 @@ public:
 
         // Fzf = lr*m*9.8/(4*(lf+lr));
         // Fzr = lf*m*9.8/(4*(lf+lr)); 
-        Fdrv = kesi_new.throttle*Cm*kesi_new.throttle;
+        Fdrv = kesi_new.throttle*Cm;
         Fbf = kesi_new.brakes*Cbf*tanh(kesi.v_x);
         Fbr = kesi_new.brakes*Cbr*tanh(kesi.v_x);
         Frrr = Crr*tanh(kesi.v_x);
@@ -193,10 +193,10 @@ public:
         kappa_f = Tire.kappa(vlf,kesi.omega_f);
         kappa_r = Tire.kappa(vlr,kesi.omega_r);
 
-        Fyf = Tire.solveFy(alpha_f);
-        Fyr = Tire.solveFy(alpha_r);
-        Fxf = Tire.solveFx(kappa_f);
-        Fxr = Tire.solveFx(kappa_r);
+        Fyf = 2 * Tire.solveFy(alpha_f);
+        Fyr = 2 * Tire.solveFy(alpha_r);
+        Fxf = 2 * Tire.solveFx(kappa_f);
+        Fxr = 2 * Tire.solveFx(kappa_r);
 
         // cout<<Fdrv<<" "<<Frrr<<" "<<Frrf<<" "<< Fdrag<<" "<< Fbf<<" "<< Fbr<<" "<< alpha_f<<" "<< alpha_r<<" "<< Fyf<<" "<<Fyr<<" "<<endl;
 
@@ -204,24 +204,22 @@ public:
         states_dot_dyn.Y_dot = kesi.v_x*sin(kesi.theta)+kesi.v_y*cos(kesi.theta);
         states_dot_dyn.phi_dot = kesi.r;
         states_dot_dyn.vx_dot = 1/m*(m*kesi.v_y*kesi.r
-                        //+2*Fdrv-2*Fbf*cos(kesi_new.steering_angle)-2*Fbr
-                        +2*Fxf*cos(kesi_new.steering_angle)+2*Fxr
+                        +Fxf*cos(kesi_new.steering_angle)+Fxr
                         -Frrr-Frrf*cos(kesi_new.steering_angle)
-                        -Fdrag-2*Fyf*sin(kesi_new.steering_angle)
+                        -Fdrag-Fyf*sin(kesi_new.steering_angle)
                         );
         states_dot_dyn.vy_dot = 1/m*(-m*kesi.v_x*kesi.r
-                        +2*Fxf*sin(kesi_new.steering_angle)
-                        +2*Fyf*cos(kesi_new.steering_angle)+2*Fyr
-                        // -(Frrf+2*Fbf)*sin(kesi_new.steering_angle));
+                        +Fxf*sin(kesi_new.steering_angle)
+                        +Fyf*cos(kesi_new.steering_angle)+Fyr
                         -Frrf*sin(kesi_new.steering_angle));
                         
-        states_dot_dyn.r_dot = 1/Iz*((2*Fyf*cos(kesi_new.steering_angle)
-                        +2*Fxf*sin(kesi_new.steering_angle)
+        states_dot_dyn.r_dot = 1/Iz*((Fyf*cos(kesi_new.steering_angle)
+                        +Fxf*sin(kesi_new.steering_angle)
                         -Frrf*sin(kesi_new.steering_angle))*lf
-                        -2*Fyr*lr);
+                        -Fyr*lr);
 
-        states_dot_dyn.omega_dot_f = -(Fxf-Fbf-Frrf/2)*Tire.r_eff()/Iwz;
-        states_dot_dyn.omega_dot_r = (Fdrv-Fbr-Fxr-Frrr/2)*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_f = -(Fxf-Fbf-Frrf)/2*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_r = (Fdrv-Fbr-Fxr-Frrr)/2*Tire.r_eff()/Iwz;
         
         return states_dot_dyn;
     }
@@ -286,6 +284,7 @@ public:
             kesi_old = kesi_new;
             }
             outputFile<<i*0.05<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_new.omega_f<<" "<<kesi_new.omega_r<<"\n"<<endl;
+            cout<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_new.omega_f<<" "<<kesi_new.omega_r<<"\n"<<endl;
         }
     }
 };
