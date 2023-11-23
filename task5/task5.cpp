@@ -285,7 +285,7 @@ public:
         input>>steps;
         float thr,ste,bra;
 
-        for (int i = 0; i <= steps; ++i) {
+        for (int i = 0; i < steps; ++i) {
             input >> thr >> ste >> bra;
             for(int j = 0;j < 50; ++j){
  
@@ -303,9 +303,11 @@ public:
             // outputFile<<" OMEGA_DOT "<<states_dot_dyn.omega_dot_f<<" "<<states_dot_dyn.omega_dot_r<<"\n";
             kesi_old = kesi_new;
             }
-            outputFile<<i*0.05<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_new.omega_f<<" "<<kesi_new.omega_r<<"\n"<<endl;
-            cout<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<endl;
-        }
+            outputFile<<"throttle:"<<thr<<" steeringAngle:"<<ste<<" brakes:"<<bra<<endl;
+            outputFile<<"X:"<<kesi_new.X<<" Y:"<<kesi_new.Y<<" yaw:"<<kesi_new.theta<<" vx:"<<kesi_new.v_x<<" vy:"<<kesi_new.v_y<<" r:"<<kesi_new.r<<" wf:"<<kesi_new.omega_f<<" wr:"<<kesi_new.omega_r<<"\n"<<endl;
+            cout<<"throttle:"<<thr<<" steeringAngle:"<<ste<<" brakes:"<<bra<<endl;
+            cout<<"X:"<<kesi_new.X<<" Y:"<<kesi_new.Y<<" yaw:"<<kesi_new.theta<<" vx:"<<kesi_new.v_x<<" vy:"<<kesi_new.v_y<<" r:"<<kesi_new.r<<" wf:"<<kesi_new.omega_f<<" wr:"<<kesi_new.omega_r<<"\n"<<endl;
+         }
     }
 };
 
