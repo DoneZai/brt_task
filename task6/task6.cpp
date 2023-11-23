@@ -255,10 +255,10 @@ public:
                         -Frrf*sin(kesi_new.steering_angle))*lf
                         -(Fyrl+Fyrr)*lr);
 
-        states_dot_dyn.omega_dot_f_l = -(Fxfl-Fbf-Frrf/2)*Tire.r_eff()/Iwz;
-        states_dot_dyn.omega_dot_f_r = -(Fxfr-Fbf-Frrf/2)*Tire.r_eff()/Iwz;
-        states_dot_dyn.omega_dot_r_l = (Fdrv-Fbr-Fxrl-Frrr/2)*Tire.r_eff()/Iwz;
-        states_dot_dyn.omega_dot_r_r = (Fdrv-Fbr-Fxrr-Frrr/2)*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_f_l = -(Fxfl+Fbf/2+Frrf/2)*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_f_r = -(Fxfr+Fbf/2+Frrf/2)*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_r_l = (Fdrv/2-Fbr/2-Fxrl-Frrr/2)*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_r_r = (Fdrv/2-Fbr/2-Fxrr-Frrr/2)*Tire.r_eff()/Iwz;
         
         return states_dot_dyn;
     }
