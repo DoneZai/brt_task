@@ -69,6 +69,20 @@ Kesi operator+(const Kesi& kesi, const States_dot& states_dot) {
     return result;
 }
 
+class LowPassFilter {
+private:
+    double output;
+    double timeConstant;
+public:
+    LowPassFilter() : output(0), timeConstant(0.001) {}
+
+    double filter(double input, double dt) {
+        double alpha = dt / (timeConstant + dt);
+        output = alpha * input + (1 - alpha) * output;
+        return output;
+    }
+};
+
 class MagicTireModel
 {
 private:
@@ -160,6 +174,9 @@ private:
     Kesi kesi_old;
     States_dot states_dot_dyn;
 
+    double tau = 0.1; 
+    LowPassFilter filter;
+
     float vxf,vxr,vyf,vyr,vlf,vlr,omega;
     float Fdrv,Frrr,Frrf,Fdrag,Fbf,Fbr,Fxf,Fxr,Fyf,Fyr,alpha_f,alpha_r,kappa_f,kappa_r;
 
@@ -192,6 +209,9 @@ public:
         vlr = vxr;
         kappa_f = Tire.kappa(vlf,kesi.omega_f);
         kappa_r = Tire.kappa(vlr,kesi.omega_r);
+
+        kappa_f = filter.filter(kappa_f, 0.001);
+        kappa_r = filter.filter(kappa_r, 0.001);
 
         Fyf = 2 * Tire.solveFy(alpha_f);
         Fyr = 2 * Tire.solveFy(alpha_r);
@@ -227,28 +247,19 @@ public:
     
 
     Kesi rungeKutta(float thr,float ste,float bra, float h) {
-        // ofstream outputFile1("output1.txt",std::ios_base::app);
-
-        // outputFile1<<"1 "<<Tire.kappa(vlf,kesi_old.omega_f)<<endl;
-
         States_dot k1 = calculateStatesDot(thr,ste,bra,kesi_old);
         Kesi kesi_k1 = kesi_old + k1 * (h / 2.0);
-        // outputFile1<<"2 "<<Tire.kappa(vlf,kesi_k1.omega_f)<<endl;
 
         States_dot k2 = calculateStatesDot(thr,ste,bra,kesi_k1);
         Kesi kesi_k2 = kesi_old + k2 * (h / 2.0);
-        // outputFile1<<"3 "<<Tire.kappa(vlf,kesi_k2.omega_f)<<endl;
 
         States_dot k3 = calculateStatesDot(thr,ste,bra,kesi_k2);
         Kesi kesi_k3 = kesi_old + k3 * h;
-        // outputFile1<<"4 "<<Tire.kappa(vlf,kesi_k3.omega_f)<<endl;
 
         States_dot k4 = calculateStatesDot(thr,ste,bra,kesi_k3);
         States_dot k_result = (k1 + 2.0 * k2 + 2.0 * k3  + k4);
-        // outputFile1<<"result_dot "<<k_result.omega_dot_f<<" "<<k_result.omega_dot_r<<endl;
         
         Kesi kesi_result = kesi_old + (k1 + 2.0 * k2 + 2.0 * k3  + k4) * (h / 6.0);
-        // outputFile1<<"5 "<<Tire.kappa(vlf,kesi_result.omega_f)<<endl;
 
     return kesi_old + (k1 + 2.0 * k2 + 2.0 * k3  + k4) * (h / 6.0);
     }
@@ -265,7 +276,7 @@ public:
         input>>steps;
         float thr,ste,bra;
 
-        for (int i = 0; i <= steps; ++i) {
+        for (int i = 0; i < steps; ++i) {
             input >> thr >> ste >> bra;
             for(int j = 0;j < 50; ++j){
  
@@ -284,8 +295,10 @@ public:
             // outputFile<<" OMEGA_DOT "<<states_dot_dyn.omega_dot_f<<" "<<states_dot_dyn.omega_dot_r<<"\n";
             kesi_old = kesi_new;
             }
-            outputFile<<i*0.05<<" "<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_new.omega_f<<" "<<kesi_new.omega_r<<"\n"<<endl;
-            cout<<kesi_new.X<<" "<<kesi_new.Y<<" "<<kesi_new.theta<<" "<<kesi_new.v_x<<" "<<kesi_new.v_y<<" "<<kesi_new.r<<" "<<kesi_new.omega_f<<" "<<kesi_new.omega_r<<"\n"<<endl;
+            outputFile<<"throttle:"<<thr<<" steeringAngle:"<<ste<<" brakes:"<<bra<<endl;
+            outputFile<<"X:"<<kesi_new.X<<" Y:"<<kesi_new.Y<<" yaw:"<<kesi_new.theta<<" vx:"<<kesi_new.v_x<<" vy:"<<kesi_new.v_y<<" r:"<<kesi_new.r<<" wf:"<<kesi_new.omega_f<<" wr:"<<kesi_new.omega_r<<"\n"<<endl;
+            cout<<"throttle:"<<thr<<" steeringAngle:"<<ste<<" brakes:"<<bra<<endl;
+            cout<<"X:"<<kesi_new.X<<" Y:"<<kesi_new.Y<<" yaw:"<<kesi_new.theta<<" vx:"<<kesi_new.v_x<<" vy:"<<kesi_new.v_y<<" r:"<<kesi_new.r<<" wf:"<<kesi_new.omega_f<<" wr:"<<kesi_new.omega_r<<"\n"<<endl;
         }
     }
 };
