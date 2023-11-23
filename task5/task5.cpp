@@ -225,7 +225,6 @@ public:
         states_dot_dyn.Y_dot = kesi.v_x*sin(kesi.theta)+kesi.v_y*cos(kesi.theta);
         states_dot_dyn.phi_dot = kesi.r;
         states_dot_dyn.vx_dot = 1/m*(m*kesi.v_y*kesi.r
-                        //+2*Fdrv-2*Fbf*cos(kesi_new.steering_angle)-2*Fbr
                         +Fxf*cos(kesi_new.steering_angle)+Fxr
                         -Frrr-Frrf*cos(kesi_new.steering_angle)
                         -Fdrag-Fyf*sin(kesi_new.steering_angle)
@@ -233,7 +232,6 @@ public:
         states_dot_dyn.vy_dot = 1/m*(-m*kesi.v_x*kesi.r
                         +Fxf*sin(kesi_new.steering_angle)
                         +Fyf*cos(kesi_new.steering_angle)+Fyr
-                        // -(Frrf+2*Fbf)*sin(kesi_new.steering_angle));
                         -Frrf*sin(kesi_new.steering_angle));
                         
         states_dot_dyn.r_dot = 1/Iz*((Fyf*cos(kesi_new.steering_angle)
@@ -241,8 +239,8 @@ public:
                         -Frrf*sin(kesi_new.steering_angle))*lf
                         -Fyr*lr);
 
-        states_dot_dyn.omega_dot_f = -(Fxf-Fbf-Frrf)*Tire.r_eff()/Iwz;
-        states_dot_dyn.omega_dot_r = (Fdrv-Fbr-Fxr-Frrr)*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_f = -(Fxf+Fbf+Frrf)/2*Tire.r_eff()/Iwz;
+        states_dot_dyn.omega_dot_r = (Fdrv-Fbr-Fxr-Frrr)/2*Tire.r_eff()/Iwz;
         
         return states_dot_dyn;
     }
