@@ -87,9 +87,6 @@ private:
     float gamma,gammax,gammay,alphay,kappax,alpha_s,kappa_s;
     float Fz0,Fz,dfz;
 
-    float sgn(float x){
-        return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
-    }
     
 public:
     MagicTireModel(){
@@ -118,6 +115,10 @@ public:
         Bx = Kx/(Cx*Dx);
 
 
+    }
+    
+    float sgn(float x){
+        return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
     }
     
     float r_stat(){ 
@@ -242,17 +243,17 @@ public:
         states_dot_dyn.phi_dot = kesi.r;
         states_dot_dyn.vx_dot = 1/m*(m*kesi.v_y*kesi.r
                         +(Fxfl+Fxfr)*cos(kesi_new.steering_angle)+Fxrl+Fxrr
-                        -Frrr-Frrf*cos(kesi_new.steering_angle)
+                        -Tire.sgn(Fxrl)*Frrr-Tire.sgn(Fxfl)*Frrf*cos(kesi_new.steering_angle)
                         -Fdrag-(Fyfl+Fyfr)*sin(kesi_new.steering_angle)
                         );
         states_dot_dyn.vy_dot = 1/m*(-m*kesi.v_x*kesi.r
                         +(Fxfl+Fxfr)*sin(kesi_new.steering_angle)
                         +(Fyfl+Fyfr)*cos(kesi_new.steering_angle)+(Fyrl+Fyrr)
-                        -Frrf*sin(kesi_new.steering_angle));
+                        -Tire.sgn(Fxfl)*Frrf*sin(kesi_new.steering_angle));
                         
         states_dot_dyn.r_dot = 1/Iz*(((Fyfl+Fyfr)*cos(kesi_new.steering_angle)
                         +(Fxfl+Fxfr)*sin(kesi_new.steering_angle)
-                        -Frrf*sin(kesi_new.steering_angle))*lf
+                        -Tire.sgn(Fxfl)*Frrf*sin(kesi_new.steering_angle))*lf
                         -(Fyrl+Fyrr)*lr);
 
         states_dot_dyn.omega_dot_f_l = -(Fxfl+Fbf/2+Frrf/2)*Tire.r_eff()/Iwz;
