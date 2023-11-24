@@ -76,6 +76,21 @@ Kesi operator+(const Kesi& kesi, const States_dot& states_dot) {
     return result;
 }
 
+class LowPassFilter {
+private:
+    double output;
+    double timeConstant;
+public:
+    LowPassFilter() : output(0), timeConstant(0.001) {}
+
+    double filter(double input, double dt) {
+        double alpha = dt / (timeConstant + dt);
+        output = alpha * input + (1 - alpha) * output;
+        return output;
+    }
+};
+
+
 class MagicTireModel
 {
 private:
@@ -182,6 +197,8 @@ private:
     Kesi kesi_old;
     States_dot states_dot_dyn;
 
+    LowPassFilter filter;
+
     float vxf,vxr,vyf,vyr,vlf,vlr,omega;
     float Fdrv,Frrr,Frrf,Fdrag,Fbf,Fbr,Fxfl,Fxfr,Fxrl,Fxrr,Fyfl,Fyfr,Fyrl,Fyrr,alpha_fl,alpha_fr,alpha_rl,alpha_rr,kappa_fl,kappa_fr,kappa_rl,kappa_rr;
 
@@ -218,6 +235,12 @@ public:
         kappa_fr = Tire.kappa(vlf,kesi.omega_f_r);
         kappa_rl = Tire.kappa(vlr,kesi.omega_r_l);
         kappa_rr = Tire.kappa(vlr,kesi.omega_r_r);
+
+        kappa_fl = filter.filter(kappa_fl, 0.001);
+        kappa_fr = filter.filter(kappa_fr, 0.001);
+        kappa_rl = filter.filter(kappa_rl, 0.001);
+        kappa_rr = filter.filter(kappa_rr, 0.001);
+
 
         // Fyf = Tire.solveFy(alpha_f);
         // Fyr = Tire.solveFy(alpha_r);
